@@ -84,11 +84,12 @@
     <canvas id="game" width="400" height="400"></canvas>
     <div class="overlay" id="overlay">
       <h2 id="overlay-title">游戏结束</h2>
+      <button id="revive">复活（消耗 30 分）</button>
       <button id="restart">重新开始</button>
     </div>
   </div>
 
-  <p class="tip">方向键 / WASD 控制方向 · 空格暂停 · 吃到食物得分</p>
+  <p class="tip">方向键 / WASD 控制方向 · 空格暂停 · 积分 ≥ 30 可消耗 30 分复活</p>
 
   <script>
     const canvas = document.getElementById('game');
@@ -97,6 +98,7 @@
     const bestEl = document.getElementById('best');
     const overlay = document.getElementById('overlay');
     const overlayTitle = document.getElementById('overlay-title');
+    const reviveBtn = document.getElementById('revive');
 
     const GRID = 20;                 // 每格像素
     const COLS = canvas.width / GRID;   // 20
@@ -116,6 +118,7 @@
       running = true;
       paused = false;
       overlay.classList.remove('show');
+      reviveBtn.style.display = 'none';
       placeFood();
       clearInterval(timer);
       timer = setInterval(tick, 120);
@@ -164,7 +167,22 @@
         bestEl.textContent = best;
       }
       overlayTitle.textContent = '游戏结束';
+      reviveBtn.style.display = score >= 30 ? '' : 'none';
       overlay.classList.add('show');
+    }
+
+    function revive() {
+      score -= 30;
+      scoreEl.textContent = score;
+      snake = [{ x: Math.floor(COLS / 2), y: Math.floor(ROWS / 2) }];
+      dir = { x: 1, y: 0 };
+      nextDir = dir;
+      running = true;
+      paused = false;
+      overlay.classList.remove('show');
+      placeFood();
+      clearInterval(timer);
+      timer = setInterval(tick, 120);
     }
 
     function draw() {
@@ -219,6 +237,7 @@
       paused = !paused;
       if (paused) {
         overlayTitle.textContent = '已暂停';
+        reviveBtn.style.display = 'none';
         overlay.classList.add('show');
       } else {
         overlay.classList.remove('show');
@@ -226,6 +245,7 @@
     }
 
     document.getElementById('restart').addEventListener('click', reset);
+    reviveBtn.addEventListener('click', revive);
 
     reset();
     draw();
